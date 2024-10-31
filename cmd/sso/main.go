@@ -1,11 +1,48 @@
-package sso
+package main
+
+import (
+	"log/slog"
+	"os"
+
+	"github.com/DavidG9999/my_grpc_app/internal/config"
+)
+
+const (
+	envLocal = "local"
+	envDev   = "dev"
+	envProd  = "prod"
+)
 
 func main() {
-//TODO: инциализировать объект конфига
+	cfg := config.MustLoad()
 
-//TODO: инициализтровать логгер
+	log := setupLogger(cfg.Env)
 
-//TODO: инициализировать приложение (app)
+	log.Info("starting application")
 
-//TODO: запустить gRPC-сервер приложения
+
+	//TODO: инициализировать приложение (app)
+
+	// TODO: запустить gRPC-сервер приложения
+}
+
+func setupLogger(env string) *slog.Logger {
+	var log *slog.Logger
+
+	switch env {
+	case envLocal:
+		log = slog.New(
+			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+		)
+	case envDev:
+		log = slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+		)
+	case envProd:
+		log = slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
+		)
+	}
+
+	return log
 }
