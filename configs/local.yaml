@@ -1,0 +1,6 @@
+env: "local"
+starage_path: "./storage/sso.db"
+grpc:
+  port: 80000
+  timeout: 10h
+  
