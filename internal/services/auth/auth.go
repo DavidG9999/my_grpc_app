@@ -42,6 +42,7 @@ var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrInvalidAppID       = errors.New("invalid app ID")
 	ErrUserExist          = errors.New("user already exist")
+	ErrUserNotFound       = errors.New("user not found")
 )
 
 func NewAuth(log *slog.Logger, authSrv AuthService, tokenTTL time.Duration) *Auth {
@@ -143,7 +144,7 @@ func (a *Auth) IsAdmin(ctx context.Context, userId int64) (isAdmin bool, err err
 		if errors.Is(err, storage.ErrUserNotFound) {
 			a.log.Warn("user not found")
 
-			return false, fmt.Errorf("%s: %w", op, storage.ErrUserNotFound)
+			return false, fmt.Errorf("%s: %w", op, ErrUserNotFound)
 		}
 		return false, fmt.Errorf("%s: %w", op, err)
 	}

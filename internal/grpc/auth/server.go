@@ -6,7 +6,6 @@ import (
 
 	ssov1 "github.com/DavidG9999/api/gen/go/sso"
 	"github.com/DavidG9999/my_grpc_app/internal/services/auth"
-	"github.com/DavidG9999/my_grpc_app/internal/storage"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -51,6 +50,9 @@ func (s *serverAPI) SignIn(ctx context.Context, req *ssov1.SignInRequest) (*ssov
 		if errors.Is(err, auth.ErrInvalidCredentials) {
 			return nil, status.Error(codes.InvalidArgument, "user not found")
 		}
+		if errors.Is(err, auth.ErrInvalidAppID) {
+			return nil, status.Error(codes.InvalidArgument, "app not found")
+		}
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	return &ssov1.SignInResponse{
@@ -64,7 +66,7 @@ func (s *serverAPI) IsAdmin(ctx context.Context, req *ssov1.IsAdminRequest) (*ss
 	}
 	isAdmin, err := s.auth.IsAdmin(ctx, req.GetUserId())
 	if err != nil {
-		if errors.Is(err, storage.ErrUserNotFound) {
+		if errors.Is(err, auth.ErrUserNotFound) {
 			return nil, status.Error(codes.NotFound, "user not found")
 		}
 		return nil, status.Error(codes.Internal, "internal error")
@@ -79,7 +81,7 @@ func validateSighIn(req *ssov1.SignInRequest) error {
 		return status.Error(codes.InvalidArgument, "email is required")
 	}
 	if req.GetPassword() == "" {
-		return status.Error(codes.InvalidArgument, "password  is required")
+		return status.Error(codes.InvalidArgument, "password is required")
 	}
 	if req.GetAppId() == emptyValue {
 		return status.Error(codes.InvalidArgument, "app_id is required")
@@ -92,7 +94,7 @@ func validateSighUp(req *ssov1.SignUpRequest) error {
 		return status.Error(codes.InvalidArgument, "email is required")
 	}
 	if req.GetPassword() == "" {
-		return status.Error(codes.InvalidArgument, "password  is required")
+		return status.Error(codes.InvalidArgument, "password is required")
 	}
 	if req.GetName() == "" {
 		return status.Error(codes.InvalidArgument, "name is required")
